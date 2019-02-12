@@ -40,6 +40,7 @@ def parse_topic(topic):
         return None, None
 def on_connect(mqttc, obj, flags, rc):
     logging.info("rc: " + str(rc))
+    logging.info("connected")
     mqttc.subscribe(config["prefix"]+"/+/+", 0)
 
 def on_message(mqttc, obj, msg):
@@ -59,6 +60,11 @@ def on_subscribe(mqttc, obj, mid, granted_qos):
 def on_log(mqttc, obj, level, string):
     logging.info(string)
 
+def on_disconnect(client, userdata, rc):
+    m = "disconnecting reason: " + str(rc)
+    logging.info(m)
+    logging.info('trying to connect')
+    client.connect(config["host"], config["port"], 60)
 
 # If you want to use a specific client id, use
 # mqttc = mqtt.Client("client-id")
@@ -69,6 +75,7 @@ mqttc.on_message = on_message
 mqttc.on_connect = on_connect
 mqttc.on_publish = on_publish
 mqttc.on_subscribe = on_subscribe
+mqttc.on_disconnect = on_disconnect
 # Uncomment to enable debug messages
 # mqttc.on_log = on_log
 if config.get("username") and config.get("password"):
